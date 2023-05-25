@@ -7,17 +7,17 @@ namespace APIModallportV5.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VistoriasController : Controller
+    public class ItensController : Controller
     {
         private readonly OracleConnection _connection;
 
-        public VistoriasController(OracleConnection connection)
+        public ItensController(OracleConnection connection)
         {
             _connection = connection;
         }
 
         [HttpPost]
-        public JsonResult Post([FromBody] VistoriaModel model)
+        public JsonResult Post([FromBody] ItemModel ItemModel)
         {
             try
             {
@@ -27,11 +27,11 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro)";
-                    command.Parameters.Add("CodVistoria", OracleDbType.Varchar2).Value = model.CodVistoria;
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = model.Descricao;
-                    command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = model.Processo; // Adicionado o parâmetro Processo
-                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = model.DataDeCadastro;
+                    command.CommandText = "INSERT INTO Itens (Descricao, Ordem, Tipo, IdVistoria) VALUES (:Descricao, :Ordem, :Tipo, :IdVistoria)";
+                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = ItemModel.Descricao;
+                    command.Parameters.Add("Ordem", OracleDbType.Varchar2).Value = ItemModel.Ordem;
+                    command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = ItemModel.Tipo;
+                    command.Parameters.Add("IdVistoria", OracleDbType.Varchar2).Value = ItemModel.IdVistoria;
                     command.ExecuteNonQuery();
                 }
 
@@ -45,9 +45,8 @@ namespace APIModallportV5.Controllers
             }
         }
 
-
-        [HttpPut("{idVistoria}")]
-        public JsonResult Put(int idVistoria, [FromBody] VistoriaModel VistoriaModel)
+        [HttpPut("{idItem}")]
+        public JsonResult Put(int idItem, [FromBody] ItemModel ItemModel)
         {
             try
             {
@@ -55,10 +54,12 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE Vistorias SET Descricao = :Descricao, Processo = :Processo WHERE IdVistoria = :IdVistoria";
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = VistoriaModel.Descricao;
-                    command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = VistoriaModel.Processo;
-                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
+                    command.CommandText = "UPDATE Itens SET Descricao = :Descricao, Ordem = :Ordem WHERE IdVistoria = :IdVistoria AND IdItem = :IdItem";
+                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = ItemModel.Descricao;
+                    command.Parameters.Add("Ordem", OracleDbType.Int32).Value = ItemModel.Ordem;
+                    command.Parameters.Add("Tipo", OracleDbType.Char).Value = ItemModel.Tipo;
+                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = ItemModel.IdVistoria;
+                    command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
                     command.ExecuteNonQuery();
                 }
 
@@ -72,9 +73,8 @@ namespace APIModallportV5.Controllers
             }
         }
 
-
-        [HttpDelete("{idVistoria}")]
-        public JsonResult Delete(int idVistoria)
+        [HttpDelete("{idItem}")]
+        public JsonResult Delete(int idItem)
         {
             try
             {
@@ -82,8 +82,8 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE Vistorias SET Ativo = 'N' WHERE IdVistoria = :IdVistoria";
-                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
+                    command.CommandText = "UPDATE Itens SET Ativo = 'N' WHERE IdItem = :IdItem";
+                    command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
                     command.ExecuteNonQuery();
                 }
 

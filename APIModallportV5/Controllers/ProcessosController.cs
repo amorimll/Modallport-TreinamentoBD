@@ -7,11 +7,11 @@ namespace APIModallPortV5.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProcessoController : ControllerBase
+    public class ProcessosController : ControllerBase
     {
         private readonly OracleConnection _connection;
 
-        public ProcessoController(OracleConnection connection)
+        public ProcessosController(OracleConnection connection)
         {
             _connection = connection;
         }
@@ -28,7 +28,7 @@ namespace APIModallPortV5.Controllers
                 using (var command = _connection.CreateCommand())
                 {
                     command.CommandText = "INSERT INTO Processos (CodProcesso, Descricao, DataDeCadastro) VALUES (:CodProcesso, :Descricao, :DataDeCadastro)";
-                    command.Parameters.Add("CodProcesso", OracleDbType.Int32).Value = model.CodProcesso;
+                    command.Parameters.Add("CodProcesso", OracleDbType.Varchar2).Value = model.CodProcesso;
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = model.Descricao;
                     command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = model.DataDeCadastro;
                     command.ExecuteNonQuery();

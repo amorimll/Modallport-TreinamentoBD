@@ -1,4 +1,85 @@
-# Documentação da API
+# Oracle
+## Criar tabelas necessárias
+
+Coloque seu login e senha em appsettings.json 
+
+Passe esse código no oracle:
+
+```
+CREATE SEQUENCE SeqProcessos
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+    
+CREATE SEQUENCE SeqVistorias
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+    
+CREATE SEQUENCE SeqItens
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE SEQUENCE SeqRespostas
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE SEQUENCE SeqOpcoes
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+    
+CREATE TABLE Processos (
+    IdProcesso NUMBER(10) DEFAULT SeqProcessos.NEXTVAL PRIMARY KEY,
+    CodProcesso VARCHAR2(10),
+    Descricao VARCHAR2(255),
+    Ativo CHAR(1) DEFAULT 'S',
+    DataDeCadastro DATE
+);
+
+CREATE TABLE Vistorias (
+    IdVistoria NUMBER(10) DEFAULT SeqVistorias.NEXTVAL PRIMARY KEY,
+    CodVistoria VARCHAR2(255),
+    Descricao VARCHAR2(255),
+    Processo VARCHAR2(10),
+    Ativo CHAR(1) DEFAULT 'S',
+    DataDeCadastro DATE
+);
+
+CREATE TABLE Itens (
+    IdItem NUMBER(10) DEFAULT SeqItens.NEXTVAL PRIMARY KEY,
+    Descricao VARCHAR2(255) NOT NULL,
+    Ordem NUMBER(10) NOT NULL,
+    Tipo CHAR(1) NOT NULL,
+    Ativo CHAR(1) DEFAULT 'S',
+    IdVistoria NUMBER(10) NOT NULL,
+    FOREIGN KEY (IdVistoria) REFERENCES Vistorias (IdVistoria)
+);
+
+CREATE TABLE RespostasItens (
+    IdResposta NUMBER(10) DEFAULT SeqRespostas.NEXTVAL PRIMARY KEY,
+    Pergunta VARCHAR2(255) NOT NULL,
+    IdItem NUMBER(10) NOT NULL,
+    FOREIGN KEY (IdItem) REFERENCES Itens (IdItem)
+);
+
+CREATE TABLE OpcoesItens (
+    IdOpcao NUMBER(10) DEFAULT SeqOpcoes.NEXTVAL PRIMARY KEY,
+    Opcao VARCHAR2(255) NOT NULL,
+    IdItem NUMBER(10) NOT NULL,
+    FOREIGN KEY (IdItem) REFERENCES Itens (IdItem)
+);
+```
+
+# API
+
 ## Itens
 ### GET /api/Itens
 Recupera uma lista de itens.

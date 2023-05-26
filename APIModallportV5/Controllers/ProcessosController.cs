@@ -2,6 +2,7 @@
 using Oracle.ManagedDataAccess.Client;
 using System;
 using APIModallportV5.Model;
+using System.Collections.Generic;
 
 namespace APIModallPortV5.Controllers
 {
@@ -16,8 +17,49 @@ namespace APIModallPortV5.Controllers
             _connection = connection;
         }
 
+        [HttpGet]
+        public JsonResult GetAll()
+        {
+            try
+            {
+                _connection.Open();
+
+                var processos = new List<ProcessoModel>();
+
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT IdProcesso, CodProcesso, Descricao, DataDeCadastro FROM Processos WHERE Ativo = 'S'";
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var processo = new ProcessoModel
+                            {
+                                IdProcesso = reader.GetInt32(reader.GetOrdinal("IdProcesso")),
+                                CodProcesso = reader.GetString(reader.GetOrdinal("CodProcesso")),
+                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro"))
+                            };
+
+                            processos.Add(processo);
+                        }
+                    }
+                }
+
+                _connection.Close();
+
+                return new JsonResult(processos);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(ex.Message);
+            }
+        }
+
+
         [HttpPost]
-        public JsonResult Post([FromBody] ProcessoModel model)
+        public JsonResult Post([FromBody] ProcessoModel processoModel)
         {
             try
             {
@@ -28,9 +70,9 @@ namespace APIModallPortV5.Controllers
                 using (var command = _connection.CreateCommand())
                 {
                     command.CommandText = "INSERT INTO Processos (CodProcesso, Descricao, DataDeCadastro) VALUES (:CodProcesso, :Descricao, :DataDeCadastro)";
-                    command.Parameters.Add("CodProcesso", OracleDbType.Varchar2).Value = model.CodProcesso;
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = model.Descricao;
-                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = model.DataDeCadastro;
+                    command.Parameters.Add("CodProcesso", OracleDbType.Varchar2).Value = processoModel.CodProcesso;
+                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = processoModel.Descricao;
+                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = processoModel.DataDeCadastro;
                     command.ExecuteNonQuery();
                 }
 
@@ -45,7 +87,7 @@ namespace APIModallPortV5.Controllers
         }
 
         [HttpPut("{idProcesso}")]
-        public JsonResult Put(int idProcesso, [FromBody] ProcessoModel model)
+        public JsonResult Put(int idProcesso, [FromBody] ProcessoModel processoModel)
         {
             try
             {
@@ -54,7 +96,7 @@ namespace APIModallPortV5.Controllers
                 using (var command = _connection.CreateCommand())
                 {
                     command.CommandText = "UPDATE Processos SET Descricao = :Descricao WHERE IdProcesso = :IdProcesso";
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = model.Descricao;
+                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = processoModel.Descricao;
                     command.Parameters.Add("IdProcesso", OracleDbType.Int32).Value = idProcesso;
                     command.ExecuteNonQuery();
                 }

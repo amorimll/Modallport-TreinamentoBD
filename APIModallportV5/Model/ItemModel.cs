@@ -1,10 +1,15 @@
-﻿namespace APIModallportV5.Model
+﻿using System.Collections.Generic;
+
+namespace APIModallportV5.Model
 {
     public class ItemModel
     {
+        public int IdItem { get; set; }
         public string Descricao { get; set; }
         public int Ordem { get; set; }
         public int Tipo { get; set; }
         public int IdVistoria { get; set; }
+        public List<OpcoesListModel> opcaoModels { get; set; }
+        public List<RespostasListModel> respostaModels { get; set; }
     }
 }

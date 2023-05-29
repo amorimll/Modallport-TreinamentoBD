@@ -65,7 +65,7 @@ CREATE TABLE Itens (
 
 CREATE TABLE RespostasItens (
     IdResposta NUMBER(10) DEFAULT SeqRespostas.NEXTVAL PRIMARY KEY,
-    Pergunta VARCHAR2(255) NOT NULL,
+    Resposta VARCHAR2(255) NOT NULL,
     IdItem NUMBER(10) NOT NULL,
     FOREIGN KEY (IdItem) REFERENCES Itens (IdItem)
 );

@@ -7,6 +7,8 @@ namespace APIModallportV5.Model
         public int IdProcesso { get; set; }
         public string CodProcesso { get; set; }
         public string Descricao { get; set; }
+        public string Ativo { get; set; }
         public DateTime DataDeCadastro { get; set; }
+        public DateTime DhAlteracao { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace APIModallportV5.Controllers
     public class VistoriasController : Controller
     {
         private readonly OracleConnection _connection;
+        DateTime dataAtual = DateTime.Now;
 
         public VistoriasController(OracleConnection connection)
         {
@@ -30,7 +31,7 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, DataDeCadastro FROM Vistorias WHERE Ativo = 'S'";
+                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S'";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -42,7 +43,9 @@ namespace APIModallportV5.Controllers
                                 CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
                                 Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
                                 Processo = reader.GetString(reader.GetOrdinal("Processo")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro"))
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
                             };
 
                             vistorias.Add(vistoria);
@@ -68,37 +71,37 @@ namespace APIModallportV5.Controllers
             {
                 _connection.Open();
 
-                var itensController = new ItensController(_connection);
-                DateTime dataDeCadastro = DateTime.Now;
-                int idVistoria;
+                //var itensController = new ItensController(_connection);
+                //int idVistoria;
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro) RETURNING IdVistoria INTO :IdVistoria";
+                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro, DhAlteracao) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro, :DhAlteracao) /*RETURNING IdVistoria INTO :IdVistoria*/";
                     command.Parameters.Add("CodVistoria", OracleDbType.Varchar2).Value = vistoriaModel.CodVistoria;
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = vistoriaModel.Descricao;
                     command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = vistoriaModel.Processo;
-                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = vistoriaModel.DataDeCadastro;
-                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Direction = ParameterDirection.Output;
+                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
+                    //command.Parameters.Add("IdVistoria", OracleDbType.Int32).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
 
-                    var idVistoriaOracleDecimal = (OracleDecimal)command.Parameters["IdVistoria"].Value;
-                    idVistoria = idVistoriaOracleDecimal.ToInt32();
+                    //var idVistoriaOracleDecimal = (OracleDecimal)command.Parameters["IdVistoria"].Value;
+                    //idVistoria = idVistoriaOracleDecimal.ToInt32();
                 }
 
                 _connection.Close();
 
-                var vistoriaItem = new VistoriaItemListModel
-                {
-                    IdVistoria = idVistoria,
-                    Itens = new List<ItemModel>()
-                };
+                //var vistoriaItem = new VistoriaItemListModel
+                //{
+                //    IdVistoria = idVistoria,
+                //    Itens = new List<ItemModel>()
+                //};
 
-                vistoriaItem.Itens.AddRange(vistoriaModel.Itens);
+                //vistoriaItem.Itens.AddRange(vistoriaModel.Itens);
 
-                itensController.Post(vistoriaItem.IdVistoria, vistoriaItem.Itens);
+                //itensController.Post(vistoriaItem.IdVistoria, vistoriaItem.Itens);
 
-                return new JsonResult(vistoriaItem);
+                return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
@@ -115,9 +118,10 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE Vistorias SET Descricao = :Descricao, Processo = :Processo WHERE IdVistoria = :IdVistoria";
+                    command.CommandText = "UPDATE Vistorias SET Descricao = :Descricao, Processo = :Processo, DhAlteracao = :DhAlteracao WHERE IdVistoria = :IdVistoria";
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = vistoriaModel.Descricao;
                     command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = vistoriaModel.Processo;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                     command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
                     command.ExecuteNonQuery();
                 }
@@ -142,7 +146,8 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE Vistorias SET Ativo = 'N' WHERE IdVistoria = :IdVistoria";
+                    command.CommandText = "UPDATE Vistorias SET Ativo = 'N', DhAlteracao = :DhAlteracao WHERE IdVistoria = :IdVistoria";
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                     command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
                     command.ExecuteNonQuery();
                 }

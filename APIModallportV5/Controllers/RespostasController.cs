@@ -11,6 +11,7 @@ namespace APIModallportV5.Controllers
     public class RespostasController : Controller
     {
         private readonly OracleConnection _connection;
+        DateTime dataAtual = DateTime.Now;
 
         public RespostasController(OracleConnection connection)
         {
@@ -28,7 +29,7 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdResposta, Resposta, IdItem FROM RespostasItens";
+                    command.CommandText = "SELECT IdResposta, Resposta, IdItem, DataDeCadastro, DhAlteracao FROM RespostasItens";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -38,7 +39,9 @@ namespace APIModallportV5.Controllers
                             {
                                 IdResposta = reader.GetInt32(reader.GetOrdinal("IdResposta")),
                                 Resposta = reader.GetString(reader.GetOrdinal("Resposta")),
-                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem"))
+                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao")),
                             };
 
                             respostas.Add(resposta);
@@ -70,8 +73,10 @@ namespace APIModallportV5.Controllers
                 {
                     using (var command = _connection.CreateCommand())
                     {
-                        command.CommandText = "INSERT INTO RespostasItens (Pergunta, IdItem) VALUES (:Pergunta, :IdItem)";
+                        command.CommandText = "INSERT INTO RespostasItens (Resposta, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Resposta, :DataDeCadastro, :DhAlteracao, :IdItem)";
                         command.Parameters.Add("Resposta", OracleDbType.Varchar2).Value = respostasModel.Resposta;
+                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                         command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
                         command.ExecuteNonQuery();
                     }

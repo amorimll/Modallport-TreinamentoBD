@@ -11,6 +11,7 @@ namespace APIModallPortV5.Controllers
     public class ProcessosController : ControllerBase
     {
         private readonly OracleConnection _connection;
+        DateTime dataAtual = DateTime.Now;
 
         public ProcessosController(OracleConnection connection)
         {
@@ -28,7 +29,7 @@ namespace APIModallPortV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdProcesso, CodProcesso, Descricao, DataDeCadastro FROM Processos WHERE Ativo = 'S'";
+                    command.CommandText = "SELECT IdProcesso, CodProcesso, Descricao, Ativo, DataDeCadastro, DhAlteracao FROM Processos WHERE Ativo = 'S'";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -39,7 +40,9 @@ namespace APIModallPortV5.Controllers
                                 IdProcesso = reader.GetInt32(reader.GetOrdinal("IdProcesso")),
                                 CodProcesso = reader.GetString(reader.GetOrdinal("CodProcesso")),
                                 Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro"))
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
                             };
 
                             processos.Add(processo);
@@ -65,14 +68,13 @@ namespace APIModallPortV5.Controllers
             {
                 _connection.Open();
 
-                DateTime dataDeCadastro = DateTime.Now;
-
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO Processos (CodProcesso, Descricao, DataDeCadastro) VALUES (:CodProcesso, :Descricao, :DataDeCadastro)";
+                    command.CommandText = "INSERT INTO Processos (CodProcesso, Descricao, DataDeCadastro, DhAlteracao) VALUES (:CodProcesso, :Descricao, :DataDeCadastro, :DhAlteracao)";
                     command.Parameters.Add("CodProcesso", OracleDbType.Varchar2).Value = processoModel.CodProcesso;
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = processoModel.Descricao;
-                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = processoModel.DataDeCadastro;
+                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                     command.ExecuteNonQuery();
                 }
 
@@ -95,8 +97,9 @@ namespace APIModallPortV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE Processos SET Descricao = :Descricao WHERE IdProcesso = :IdProcesso";
+                    command.CommandText = "UPDATE Processos SET Descricao = :Descricao, DhAlteracao = :DhAlteracao WHERE IdProcesso = :IdProcesso";
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = processoModel.Descricao;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                     command.Parameters.Add("IdProcesso", OracleDbType.Int32).Value = idProcesso;
                     command.ExecuteNonQuery();
                 }
@@ -120,7 +123,8 @@ namespace APIModallPortV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE Processos SET Ativo = 'N' WHERE IdProcesso = :IdProcesso";
+                    command.CommandText = "UPDATE Processos SET Ativo = 'N', DhAlteracao = :DhAlteracao WHERE IdProcesso = :IdProcesso";
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                     command.Parameters.Add("IdProcesso", OracleDbType.Int32).Value = idProcesso;
                     command.ExecuteNonQuery();
                 }
@@ -134,6 +138,5 @@ namespace APIModallPortV5.Controllers
                 return new JsonResult(ex.Message);
             }
         }
-
     }
 }

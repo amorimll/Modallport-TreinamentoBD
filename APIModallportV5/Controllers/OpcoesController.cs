@@ -11,6 +11,7 @@ namespace APIModallportV5.Controllers
     public class OpcoesController : Controller
     {
         private readonly OracleConnection _connection;
+        DateTime dataAtual = DateTime.Now;
 
         public OpcoesController(OracleConnection connection)
         {
@@ -28,7 +29,7 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdOpcao, Opcao, IdItem FROM OpcoesItens";
+                    command.CommandText = "SELECT IdOpcao, Opcao, IdItem, DataDeCadastro, DhAlteracao FROM OpcoesItens";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -38,7 +39,9 @@ namespace APIModallportV5.Controllers
                             {
                                 IdOpcao = reader.GetInt32(reader.GetOrdinal("IdOpcao")),
                                 Opcao = reader.GetString(reader.GetOrdinal("Opcao")),
-                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem"))
+                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao")),
                             };
 
                             opcoes.Add(opcao);
@@ -58,7 +61,7 @@ namespace APIModallportV5.Controllers
 
 
         [HttpPost]
-        public JsonResult Post(int idItem, [FromBody] List<OpcaoModel> opcoesModels)
+        public JsonResult Post(int idItem, [FromBody] List<OpcaoModel> opcaoModels)
         {
             try
             {
@@ -66,12 +69,14 @@ namespace APIModallportV5.Controllers
 
                 DateTime dataDeCadastro = DateTime.Now;
 
-                foreach (var opcoesModel in opcoesModels)
+                foreach (var opcaoModel in opcaoModels)
                 {
                     using (var command = _connection.CreateCommand())
                     {
-                        command.CommandText = "INSERT INTO OpcoesItens (Opcao, IdItem) VALUES (:Opcao, :IdItem)";
-                        command.Parameters.Add("Opcao", OracleDbType.Varchar2).Value = opcoesModel.Opcao;
+                        command.CommandText = "INSERT INTO OpcoesItens (Opcao, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Opcao, :DataDeCadastro, :DhAlteracao, :IdItem)";
+                        command.Parameters.Add("Opcao", OracleDbType.Varchar2).Value = opcaoModel.Opcao;
+                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
                         command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
                         command.ExecuteNonQuery();
                     }

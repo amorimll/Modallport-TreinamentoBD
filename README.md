@@ -38,27 +38,31 @@ CREATE SEQUENCE SeqOpcoes
     
 CREATE TABLE Processos (
     IdProcesso NUMBER(10) DEFAULT SeqProcessos.NEXTVAL PRIMARY KEY,
-    CodProcesso VARCHAR2(10),
-    Descricao VARCHAR2(255),
+    CodProcesso VARCHAR2(10) NOT NULL,
+    Descricao VARCHAR2(255) NOT NULL,
     Ativo CHAR(1) DEFAULT 'S',
-    DataDeCadastro DATE
+    DataDeCadastro DATE NOT NULL,
+    DhAlteracao DATE NOT NULL
 );
 
 CREATE TABLE Vistorias (
     IdVistoria NUMBER(10) DEFAULT SeqVistorias.NEXTVAL PRIMARY KEY,
-    CodVistoria VARCHAR2(255),
-    Descricao VARCHAR2(255),
-    Processo VARCHAR2(10),
+    CodVistoria VARCHAR2(255) NOT NULL,
+    Descricao VARCHAR2(255) NOT NULL,
+    Processo VARCHAR2(10) NOT NULL,
     Ativo CHAR(1) DEFAULT 'S',
-    DataDeCadastro DATE
+    DataDeCadastro DATE NOT NULL,
+    DhAlteracao DATE NOT NULL
 );
 
 CREATE TABLE Itens (
     IdItem NUMBER(10) DEFAULT SeqItens.NEXTVAL PRIMARY KEY,
     Descricao VARCHAR2(255) NOT NULL,
     Ordem NUMBER(10) NOT NULL,
-    Tipo CHAR(1) NOT NULL,
+    Tipo NUMBER(1) NOT NULL,
     Ativo CHAR(1) DEFAULT 'S',
+    DataDeCadastro DATE NOT NULL,
+    DhAlteracao DATE NOT NULL,
     IdVistoria NUMBER(10) NOT NULL,
     FOREIGN KEY (IdVistoria) REFERENCES Vistorias (IdVistoria)
 );
@@ -66,6 +70,8 @@ CREATE TABLE Itens (
 CREATE TABLE RespostasItens (
     IdResposta NUMBER(10) DEFAULT SeqRespostas.NEXTVAL PRIMARY KEY,
     Resposta VARCHAR2(255) NOT NULL,
+    DataDeCadastro DATE NOT NULL,
+    DhAlteracao DATE NOT NULL,
     IdItem NUMBER(10) NOT NULL,
     FOREIGN KEY (IdItem) REFERENCES Itens (IdItem)
 );
@@ -73,6 +79,8 @@ CREATE TABLE RespostasItens (
 CREATE TABLE OpcoesItens (
     IdOpcao NUMBER(10) DEFAULT SeqOpcoes.NEXTVAL PRIMARY KEY,
     Opcao VARCHAR2(255) NOT NULL,
+    DataDeCadastro DATE NOT NULL,
+    DhAlteracao DATE NOT NULL,
     IdItem NUMBER(10) NOT NULL,
     FOREIGN KEY (IdItem) REFERENCES Itens (IdItem)
 );

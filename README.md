@@ -74,7 +74,7 @@ Cria um novo item.
 
 **Body**:
 
-```
+```json
 [
   {
     "descricao": "string",
@@ -91,7 +91,7 @@ Parâmetros:
 **idItem: int**
 
 **Body**:
-```
+```json
 {
   "descricao": "string",
   "ordem": 0,
@@ -114,7 +114,7 @@ Recupera uma lista de opções.
 Cria uma nova opção.
 
 **Body:**
-```
+```json
 [
   {
     "idOpcao": 0,
@@ -132,7 +132,7 @@ Recupera uma lista de processos.
 Cria um novo processo.
 
 **Body:**
-```
+```json
 {
   "codProcesso": "string",
   "descricao": "string",
@@ -147,7 +147,7 @@ Parâmetros:
 **idProcesso: int**
 
 **Body:**
-```
+```json
 {
   "codProcesso": "string",
   "descricao": "string",
@@ -175,7 +175,7 @@ Parâmetros:
 **idItem: int**
 
 **Body:**
-```
+```json
 [
   {
     "resposta": "string",
@@ -193,7 +193,7 @@ Recupera uma lista de vistorias.
 Cria uma nova vistoria.
 
 **Body:**
-```
+```json
 {
   "codVistoria": "string",
   "descricao": "string",
@@ -211,7 +211,7 @@ Parâmetros:
 **idVistoria: int**
 
 **Body:**
-```
+```json
 {
   "codVistoria": "string",
   "descricao": "string",

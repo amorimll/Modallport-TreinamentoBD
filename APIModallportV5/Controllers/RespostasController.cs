@@ -11,10 +11,13 @@ namespace APIModallportV5.Controllers
     public class RespostasController : Controller
     {
         private readonly OracleConnection _connection;
+        private readonly LogService _logService;
+
         DateTime dataAtual = DateTime.Now;
 
-        public RespostasController(OracleConnection connection)
+        public RespostasController(LogService logService, OracleConnection connection)
         {
+            _logService = logService;
             _connection = connection;
         }
 
@@ -50,11 +53,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("GET", "Dados de RESPOSTAS retornados.");
 
                 return new JsonResult(respostas);
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("GET", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -83,11 +88,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("POST", "Dados de RESPOSTAS inseridos.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("POST", "Dados de RESPOSTAS inseridos.");
                 return new JsonResult(ex.Message);
             }
         }

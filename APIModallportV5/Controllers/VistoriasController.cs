@@ -13,10 +13,13 @@ namespace APIModallportV5.Controllers
     public class VistoriasController : Controller
     {
         private readonly OracleConnection _connection;
+        private readonly LogService _logService;
+
         DateTime dataAtual = DateTime.Now;
 
-        public VistoriasController(OracleConnection connection)
+        public VistoriasController(LogService logService, OracleConnection connection)
         {
+            _logService = logService;
             _connection = connection;
         }
 
@@ -54,11 +57,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("GET", "Dados de VISTORIAS retornados.");
 
                 return new JsonResult(vistorias);
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("GET", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -90,6 +95,7 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("POST", "Dados de VISTORIAS inseridos.");
 
                 //var vistoriaItem = new VistoriaItemListModel
                 //{
@@ -105,6 +111,7 @@ namespace APIModallportV5.Controllers
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("POST", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -127,11 +134,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("PUT", "Dados de VISTORIAS alterados.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("PUT", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -153,11 +162,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("DELETE", "Dados de VISTORIAS removidos.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("DELETE", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }

@@ -3,6 +3,7 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using APIModallportV5.Model;
 using System.Collections.Generic;
+using APIModallportV5;
 
 namespace APIModallPortV5.Controllers
 {
@@ -11,10 +12,13 @@ namespace APIModallPortV5.Controllers
     public class ProcessosController : ControllerBase
     {
         private readonly OracleConnection _connection;
+        private readonly LogService _logService;
+
         DateTime dataAtual = DateTime.Now;
 
-        public ProcessosController(OracleConnection connection)
+        public ProcessosController(LogService logService, OracleConnection connection)
         {
+            _logService = logService;
             _connection = connection;
         }
 
@@ -51,11 +55,13 @@ namespace APIModallPortV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("GET", "Dados de PROCESSOS retornados.");
 
                 return new JsonResult(processos);
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("GET", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -79,11 +85,13 @@ namespace APIModallPortV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("POST", "Dados de PROCESSOS inseridos.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("POST", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -105,11 +113,13 @@ namespace APIModallPortV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("PUT", "Dados de PROCESSOS alterados.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("PUT", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -130,11 +140,13 @@ namespace APIModallPortV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("DELETE", "Dados de PROCESSOS removidos.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("DELETE", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }

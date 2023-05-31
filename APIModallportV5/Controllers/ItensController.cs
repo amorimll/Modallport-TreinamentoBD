@@ -13,10 +13,13 @@ namespace APIModallportV5.Controllers
     public class ItensController : Controller
     {
         private readonly OracleConnection _connection;
+        private readonly LogService _logService;
+
         DateTime dataAtual = DateTime.Now;
 
-        public ItensController(OracleConnection connection)
+        public ItensController(LogService logService, OracleConnection connection)
         {
+            _logService = logService;
             _connection = connection;
         }
 
@@ -55,11 +58,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("GET", "Dados de ITENS retornados.");
 
                 return new JsonResult(itens);
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("GET", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -122,6 +127,7 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("POST", "Dados de ITENS inseridos.");
 
 
                 //foreach (var idItem in itemOpcoes.IdItemList)
@@ -139,6 +145,7 @@ namespace APIModallportV5.Controllers
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("POST", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -162,11 +169,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("PUT", "Dados de ITENS alterados.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("PUT", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -216,11 +225,13 @@ namespace APIModallportV5.Controllers
                 }
 
                 _connection.Close();
+                _logService.PerformOperation("DELETE", "Dados de ITENS removidos.");
 
                 return new JsonResult(Ok());
             }
             catch (Exception ex)
             {
+                _logService.PerformOperation("DELETE", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }

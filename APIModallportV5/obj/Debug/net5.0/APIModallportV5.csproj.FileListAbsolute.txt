@@ -53,3 +53,9 @@ D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV
 D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\obj\Debug\net5.0\APIModallportV5.pdb
 D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\obj\Debug\net5.0\APIModallportV5.genruntimeconfig.cache
 D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\obj\Debug\net5.0\ref\APIModallportV5.dll
+D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\bin\Debug\net5.0\Castle.Core.dll
+D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\bin\Debug\net5.0\FakeItEasy.dll
+D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\bin\Debug\net5.0\Serilog.dll
+D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\bin\Debug\net5.0\Serilog.Sinks.Burst.dll
+D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\bin\Debug\net5.0\Serilog.Sinks.Oracle.dll
+D:\Arquivos\projetos e treinamentos\APIModallport\APIModallportV5\APIModallportV5\bin\Debug\net5.0\Serilog.Sinks.PeriodicBatching.dll

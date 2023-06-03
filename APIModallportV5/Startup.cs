@@ -1,3 +1,4 @@
+using APIModallportV5.Dao;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -65,6 +66,7 @@ namespace APIModallportV5
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "APIModallportV5 v1"));
             }
 
+            app.UseStatusCodePagesWithReExecute("/error");
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();

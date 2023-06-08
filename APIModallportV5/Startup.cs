@@ -41,6 +41,11 @@ namespace APIModallportV5
 
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddMvc();
+
+            services.AddCors();
+
             services.AddControllers();
 
             var connectionString = _configuration.GetConnectionString("OracleStrConn");
@@ -65,7 +70,9 @@ namespace APIModallportV5
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "APIModallportV5 v1"));
             }
-
+            app.UseCors(builder => {
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            });
             app.UseStatusCodePagesWithReExecute("/error");
             app.UseHttpsRedirection();
             app.UseRouting();

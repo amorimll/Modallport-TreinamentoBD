@@ -62,7 +62,7 @@ namespace APIModallportV5.Dao
             }
         }
 
-        public List<RespostaModel> PostResposta(int idItem, [FromBody] List<RespostaModel> respostasModels)
+        public RespostaModel PostResposta(int idItem, [FromBody] RespostaModel respostasModel)
         {
             try
             {
@@ -70,23 +70,20 @@ namespace APIModallportV5.Dao
 
                 DateTime dataDeCadastro = DateTime.Now;
 
-                foreach (var respostasModel in respostasModels)
+                using (var command = _connection.CreateCommand())
                 {
-                    using (var command = _connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO RespostasItens (Resposta, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Resposta, :DataDeCadastro, :DhAlteracao, :IdItem)";
-                        command.Parameters.Add("Resposta", OracleDbType.Varchar2).Value = respostasModel.Resposta;
-                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
-                        command.ExecuteNonQuery();
-                    }
+                    command.CommandText = "INSERT INTO RespostasItens (Resposta, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Resposta, :DataDeCadastro, :DhAlteracao, :IdItem)";
+                    command.Parameters.Add("Resposta", OracleDbType.Varchar2).Value = respostasModel.Resposta;
+                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
+                    command.ExecuteNonQuery();
                 }
 
                 _connection.Close();
                 _logService.PerformOperation("POST", "Dados de RESPOSTAS inseridos.");
 
-                return respostasModels;
+                return respostasModel;
             }
             catch (Exception ex)
             {

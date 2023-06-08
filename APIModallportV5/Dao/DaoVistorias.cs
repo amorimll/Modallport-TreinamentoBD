@@ -1,8 +1,10 @@
 ﻿using APIModallportV5.Model;
 using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace APIModallportV5.Dao
 {
@@ -68,20 +70,27 @@ namespace APIModallportV5.Dao
             try
             {
                 _connection.Open();
+                int idVistoria;
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro, DhAlteracao) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro, :DhAlteracao) /*RETURNING IdVistoria INTO :IdVistoria*/";
+                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro, DhAlteracao) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro, :DhAlteracao) RETURNING IdVistoria INTO :IdVistoria";
                     command.Parameters.Add("CodVistoria", OracleDbType.Varchar2).Value = vistoriaModel.CodVistoria;
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = vistoriaModel.Descricao;
                     command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = vistoriaModel.Processo;
                     command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
                     command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Direction = ParameterDirection.Output;
                     command.ExecuteNonQuery();
+
+                    var idVistoriaOracleDecimal = (OracleDecimal)command.Parameters["IdVistoria"].Value;
+                    idVistoria = idVistoriaOracleDecimal.ToInt32();
                 }
 
                 _connection.Close();
                 _logService.PerformOperation("POST", "Dados de VISTORIAS inseridos.");
+
+                vistoriaModel.IdVistoria = idVistoria;
 
                 return vistoriaModel;
             }

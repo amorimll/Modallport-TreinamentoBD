@@ -61,7 +61,7 @@ namespace APIModallportV5.Dao
             }
         }
 
-        public List<OpcaoModel> PostOpcao(int idItem, [FromBody] List<OpcaoModel> opcaoModels)
+        public OpcaoModel PostOpcao(int idItem, [FromBody] OpcaoModel opcaoModel)
         {
             try
             {
@@ -69,23 +69,20 @@ namespace APIModallportV5.Dao
 
                 DateTime dataDeCadastro = DateTime.Now;
 
-                foreach (var opcaoModel in opcaoModels)
+                using (var command = _connection.CreateCommand())
                 {
-                    using (var command = _connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO OpcoesItens (Opcao, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Opcao, :DataDeCadastro, :DhAlteracao, :IdItem)";
-                        command.Parameters.Add("Opcao", OracleDbType.Varchar2).Value = opcaoModel.Opcao;
-                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
-                        command.ExecuteNonQuery();
-                    }
+                    command.CommandText = "INSERT INTO OpcoesItens (Opcao, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Opcao, :DataDeCadastro, :DhAlteracao, :IdItem)";
+                    command.Parameters.Add("Opcao", OracleDbType.Varchar2).Value = opcaoModel.Opcao;
+                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
+                    command.ExecuteNonQuery();
                 }
 
                 _connection.Close();
                 _logService.PerformOperation("POST", "Dados de OPÇÕES inseridos.");
 
-                return opcaoModels;
+                return opcaoModel;
             }
             catch (Exception ex)
             {

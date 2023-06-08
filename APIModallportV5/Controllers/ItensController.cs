@@ -42,12 +42,12 @@ namespace APIModallportV5.Controllers
 
 
         [HttpPost]
-        public JsonResult Post(int idVistoria, [FromBody] List<ItemModel> itemModels)
+        public JsonResult Post(int idVistoria, [FromBody] ItemModel itemModel)
         {
             try
             {
                 var Dao = new DaoItens(_logService, _connection);
-                var retorno = Dao.PostItem(idVistoria, itemModels);
+                var retorno = Dao.PostItem(idVistoria, itemModel);
 
                 return new JsonResult(retorno);
             }

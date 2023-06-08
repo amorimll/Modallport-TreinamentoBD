@@ -1,8 +1,10 @@
 ﻿using APIModallportV5.Model;
 using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace APIModallportV5.Dao
 {
@@ -17,6 +19,12 @@ namespace APIModallportV5.Dao
         {
             _logService = logService;
             _connection = connection;
+        }
+
+        public class ItemWithIdModel
+        {
+            public int IdItem { get; set; }
+            public List<ItemModel> Itens { get; set; }
         }
 
         public List<ItemModel> ListaItens()
@@ -64,7 +72,7 @@ namespace APIModallportV5.Dao
             }
         }
 
-        public List<ItemModel> PostItem(int idVistoria, List<ItemModel> itemModels)
+        public ItemModel PostItem(int idVistoria, ItemModel itemModel)
         {
             try
             {
@@ -86,22 +94,22 @@ namespace APIModallportV5.Dao
                 //    Respostas = new List<RespostaModel>(),
                 //};
 
-                var itens = new List<ItemModel>();
+                int idItem;
 
-                foreach (var itemModel in itemModels)
-                {
                     using (var command = _connection.CreateCommand())
                     {
-                        command.CommandText = "INSERT INTO Itens (Descricao, Ordem, Tipo, IdVistoria, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :Ordem, :Tipo, :IdVistoria, :DataDeCadastro, :DhAlteracao)  /*RETURNING IdItem INTO :IdItem*/";
+                        command.CommandText = "INSERT INTO Itens (Descricao, Ordem, Tipo, IdVistoria, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :Ordem, :Tipo, :IdVistoria, :DataDeCadastro, :DhAlteracao)  RETURNING IdItem INTO :IdItem";
                         command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = itemModel.Descricao;
                         command.Parameters.Add("Ordem", OracleDbType.Int32).Value = Convert.ToInt32(itemModel.Ordem);
                         command.Parameters.Add("Tipo", OracleDbType.Char).Value = itemModel.Tipo;
                         command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
                         command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
                         command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                        //command.Parameters.Add("IdItem", OracleDbType.Int32).Direction = ParameterDirection.Output;
+                        command.Parameters.Add("IdItem", OracleDbType.Int32).Direction = ParameterDirection.Output;
                         command.ExecuteNonQuery();
 
+                        var idItemOracleDecimal = (OracleDecimal)command.Parameters["IdItem"].Value;
+                        idItem = idItemOracleDecimal.ToInt32();
                         //var idItemOracleDecimal = (OracleDecimal)command.Parameters["IdItem"].Value;
                         //itemOpcoes.IdItemList.Add(idItemOracleDecimal.ToInt32());
                         //itemRespostas.IdItemList.Add(idItemOracleDecimal.ToInt32());
@@ -120,8 +128,6 @@ namespace APIModallportV5.Dao
 
                     //itemOpcoes.Opcoes.Clear();
                     //itemRespostas.Respostas.Clear();
-                }
-                itens.AddRange(itemModels);
 
                 _connection.Close();
                 _logService.PerformOperation("POST", "Dados de ITENS inseridos.");
@@ -138,7 +144,10 @@ namespace APIModallportV5.Dao
                 //    Console.WriteLine(idItem);
                 //    respostasController.Post(idItem, itemRespostas.Respostas);
                 //}
-                return itens;
+
+                itemModel.IdItem = idItem;
+
+                return itemModel;
             }
             catch (Exception ex)
             {

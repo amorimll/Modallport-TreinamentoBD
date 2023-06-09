@@ -29,7 +29,7 @@ namespace APIModallportV5.Dao
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdProcesso, CodProcesso, Descricao, Ativo, DataDeCadastro, DhAlteracao FROM Processos WHERE Ativo = 'S'";
+                    command.CommandText = "SELECT IdProcesso, Descricao, Ativo, DataDeCadastro, DhAlteracao FROM Processos WHERE Ativo = 'S'";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -38,7 +38,6 @@ namespace APIModallportV5.Dao
                             var processo = new ProcessoModel
                             {
                                 IdProcesso = reader.GetInt32(reader.GetOrdinal("IdProcesso")),
-                                CodProcesso = reader.GetString(reader.GetOrdinal("CodProcesso")),
                                 Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
                                 Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
                                 DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
@@ -69,8 +68,7 @@ namespace APIModallportV5.Dao
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO Processos (CodProcesso, Descricao, DataDeCadastro, DhAlteracao) VALUES (:CodProcesso, :Descricao, :DataDeCadastro, :DhAlteracao)";
-                    command.Parameters.Add("CodProcesso", OracleDbType.Varchar2).Value = processoModel.CodProcesso;
+                    command.CommandText = "INSERT INTO Processos (Descricao, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :DataDeCadastro, :DhAlteracao)";
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = processoModel.Descricao;
                     command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
                     command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;

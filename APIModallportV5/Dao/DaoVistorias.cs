@@ -31,7 +31,7 @@ namespace APIModallportV5.Dao
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S'";
+                    command.CommandText = "SELECT IdVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S'";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -40,9 +40,8 @@ namespace APIModallportV5.Dao
                             var vistoria = new VistoriaModel
                             {
                                 IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
                                 Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Processo = reader.GetString(reader.GetOrdinal("Processo")),
+                                Processo = reader.GetInt32(reader.GetOrdinal("Processo")),
                                 Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
                                 DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
                                 DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
@@ -74,8 +73,7 @@ namespace APIModallportV5.Dao
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro, DhAlteracao) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro, :DhAlteracao) RETURNING IdVistoria INTO :IdVistoria";
-                    command.Parameters.Add("CodVistoria", OracleDbType.Varchar2).Value = vistoriaModel.CodVistoria;
+                    command.CommandText = "INSERT INTO Vistorias (Descricao, Processo, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :Processo, :DataDeCadastro, :DhAlteracao) RETURNING IdVistoria INTO :IdVistoria";
                     command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = vistoriaModel.Descricao;
                     command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = vistoriaModel.Processo;
                     command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;

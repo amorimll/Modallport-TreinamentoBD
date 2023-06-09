@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace APIModallportV5.Controllers
 {
@@ -37,16 +38,29 @@ namespace APIModallportV5.Controllers
             }
         }
 
-
         [HttpPost]
-        public JsonResult Post(int idItem, [FromBody] RespostaModel respostasModel)
+        public JsonResult Post(int idItem, [FromBody] RespostaModel respostaModel)
         {
             try
             {
-                var Dao = new DaoRespostas(_logService, _connection);
-                var respostas = Dao.PostResposta(idItem, respostasModel);
+                if (idItem <= 0)
+                {
+                    return new JsonResult("ID do item inválido");
+                }
 
-                return new JsonResult(respostas);
+                var validationContext = new ValidationContext(respostaModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(respostaModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
+                var Dao = new DaoRespostas(_logService, _connection);
+                var resposta = Dao.PostResposta(idItem, respostaModel);
+
+                return new JsonResult(resposta);
             }
             catch (Exception ex)
             {

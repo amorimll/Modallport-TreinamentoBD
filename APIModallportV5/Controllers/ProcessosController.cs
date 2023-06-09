@@ -3,8 +3,10 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using APIModallportV5.Model;
 using System.Collections.Generic;
-using APIModallportV5;
+using System.ComponentModel.DataAnnotations;
 using APIModallportV5.Dao;
+using APIModallportV5;
+using System.ComponentModel;
 
 namespace APIModallPortV5.Controllers
 {
@@ -38,12 +40,20 @@ namespace APIModallPortV5.Controllers
             }
         }
 
-
         [HttpPost]
         public JsonResult Post([FromBody] ProcessoModel processoModel)
         {
             try
             {
+                var validationContext = new ValidationContext(processoModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(processoModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
                 var Dao = new DaoProcessos(_logService, _connection);
                 var retorno = Dao.PostProcesso(processoModel);
 
@@ -60,6 +70,20 @@ namespace APIModallPortV5.Controllers
         {
             try
             {
+                if (idProcesso <= 0)
+                {
+                    return new JsonResult("ID do processo inválido");
+                }
+
+                var validationContext = new ValidationContext(processoModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(processoModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
                 var Dao = new DaoProcessos(_logService, _connection);
                 var retorno = Dao.AlteraProcesso(idProcesso, processoModel);
 
@@ -76,6 +100,11 @@ namespace APIModallPortV5.Controllers
         {
             try
             {
+                if (idProcesso <= 0)
+                {
+                    return new JsonResult("ID do processo inválido");
+                }
+
                 var Dao = new DaoProcessos(_logService, _connection);
                 var retorno = Dao.DeletaProcesso(idProcesso);
 

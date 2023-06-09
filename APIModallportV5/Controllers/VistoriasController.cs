@@ -2,10 +2,10 @@
 using APIModallportV5.Model;
 using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
-using Oracle.ManagedDataAccess.Types;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace APIModallportV5.Controllers
 {
@@ -38,12 +38,21 @@ namespace APIModallportV5.Controllers
             }
         }
 
-
         [HttpPost]
         public JsonResult Post([FromBody] VistoriaModel vistoriaModel)
         {
             try
             {
+                // Validar o modelo de vistoria usando anotações de validação
+                var validationContext = new ValidationContext(vistoriaModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(vistoriaModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
                 var Dao = new DaoVistorias(_logService, _connection);
                 var retorno = Dao.PostVistoria(vistoriaModel);
 
@@ -60,6 +69,21 @@ namespace APIModallportV5.Controllers
         {
             try
             {
+                if (idVistoria <= 0)
+                {
+                    return new JsonResult("ID da vistoria inválido");
+                }
+
+                // Validar o modelo de vistoria usando anotações de validação
+                var validationContext = new ValidationContext(vistoriaModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(vistoriaModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
                 var Dao = new DaoVistorias(_logService, _connection);
                 var retorno = Dao.AlteraVistoria(idVistoria, vistoriaModel);
 
@@ -71,12 +95,16 @@ namespace APIModallportV5.Controllers
             }
         }
 
-
         [HttpDelete("{idVistoria}")]
         public JsonResult Delete(int idVistoria)
         {
             try
             {
+                if (idVistoria <= 0)
+                {
+                    return new JsonResult("ID da vistoria inválido");
+                }
+
                 var Dao = new DaoVistorias(_logService, _connection);
                 var retorno = Dao.DeletaVistoria(idVistoria);
 

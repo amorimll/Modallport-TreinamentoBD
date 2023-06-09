@@ -72,78 +72,77 @@ namespace APIModallportV5.Dao
             }
         }
 
+        public List<ItemModel> ListaItensById(int idVistoria)
+        {
+            try
+            {
+                _connection.Open();
+
+                var itens = new List<ItemModel>();
+
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = $"SELECT IdItem, Descricao, Ordem, Tipo, Ativo, IdVistoria, DataDeCadastro, DhAlteracao FROM Itens WHERE Ativo = 'S' AND IdVistoria = {idVistoria} ORDER BY Ordem ASC";
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var item = new ItemModel
+                            {
+                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
+                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                Ordem = reader.GetInt32(reader.GetOrdinal("Ordem")),
+                                Tipo = reader.GetInt32(reader.GetOrdinal("Tipo")),
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
+                            };
+
+                            itens.Add(item);
+                        }
+                    }
+                }
+
+                _connection.Close();
+                _logService.PerformOperation("GET", "Dados de ITENS retornados.");
+
+                return itens;
+            }
+            catch (Exception ex)
+            {
+                _logService.PerformOperation("GET", $"{ex.Message}");
+                throw new Exception(ex.Message);
+            }
+        }
+
         public ItemModel PostItem(int idVistoria, ItemModel itemModel)
         {
             try
             {
                 _connection.Open();
 
-                //var opcoesController = new OpcoesController(_connection);
-                //var respostasController = new RespostasController(_connection);
-                //List<int> numerosOpcoes = new List<int>();
-                //List<int> numerosRespostas = new List<int>();
-                //var itemOpcoes = new OpcoesListModel
-                //{
-                //    IdItemList = new List<int>(numerosOpcoes),
-                //    Opcoes = new List<OpcaoModel>(),
-                //};
-
-                //var itemRespostas = new RespostasListModel
-                //{
-                //    IdItemList = new List<int>(numerosRespostas),
-                //    Respostas = new List<RespostaModel>(),
-                //};
-
                 int idItem;
 
-                    using (var command = _connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO Itens (Descricao, Ordem, Tipo, IdVistoria, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :Ordem, :Tipo, :IdVistoria, :DataDeCadastro, :DhAlteracao)  RETURNING IdItem INTO :IdItem";
-                        command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = itemModel.Descricao;
-                        command.Parameters.Add("Ordem", OracleDbType.Int32).Value = Convert.ToInt32(itemModel.Ordem);
-                        command.Parameters.Add("Tipo", OracleDbType.Char).Value = itemModel.Tipo;
-                        command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
-                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("IdItem", OracleDbType.Int32).Direction = ParameterDirection.Output;
-                        command.ExecuteNonQuery();
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = "INSERT INTO Itens (Descricao, Ordem, Tipo, IdVistoria, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :Ordem, :Tipo, :IdVistoria, :DataDeCadastro, :DhAlteracao)  RETURNING IdItem INTO :IdItem";
+                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = itemModel.Descricao;
+                    command.Parameters.Add("Ordem", OracleDbType.Int32).Value = Convert.ToInt32(itemModel.Ordem);
+                    command.Parameters.Add("Tipo", OracleDbType.Char).Value = itemModel.Tipo;
+                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
+                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
+                    command.Parameters.Add("IdItem", OracleDbType.Int32).Direction = ParameterDirection.Output;
+                    command.ExecuteNonQuery();
 
-                        var idItemOracleDecimal = (OracleDecimal)command.Parameters["IdItem"].Value;
-                        idItem = idItemOracleDecimal.ToInt32();
-                        //var idItemOracleDecimal = (OracleDecimal)command.Parameters["IdItem"].Value;
-                        //itemOpcoes.IdItemList.Add(idItemOracleDecimal.ToInt32());
-                        //itemRespostas.IdItemList.Add(idItemOracleDecimal.ToInt32());
-                    }
-
-
-                    //foreach (var opcaoModel in itemModel.opcaoModels)
-                    //{
-                    //    itemOpcoes.Opcoes.AddRange(opcaoModel.Opcoes);
-                    //}
-
-                    //foreach (var respostaModel in itemModel.respostaModels)
-                    //{
-                    //    itemRespostas.Respostas.AddRange(respostaModel.Respostas);
-                    //}
-
-                    //itemOpcoes.Opcoes.Clear();
-                    //itemRespostas.Respostas.Clear();
+                    var idItemOracleDecimal = (OracleDecimal)command.Parameters["IdItem"].Value;
+                    idItem = idItemOracleDecimal.ToInt32();
+                }
 
                 _connection.Close();
                 _logService.PerformOperation("POST", "Dados de ITENS inseridos.");
-
-
-                //foreach (var idItem in itemOpcoes.IdItemList)
-                //{
-                //    Console.WriteLine(idItem);
-                //    opcoesController.Post(idItem, itemOpcoes.Opcoes);
-                //}
-
-                //foreach (var idItem in itemRespostas.IdItemList)
-                //{
-                //    Console.WriteLine(idItem);
-                //    respostasController.Post(idItem, itemRespostas.Respostas);
-                //}
 
                 itemModel.IdItem = idItem;
 
@@ -173,6 +172,35 @@ namespace APIModallportV5.Dao
                     command.ExecuteNonQuery();
                 }
 
+                void OrdenaItens(int idVistoria)
+                {
+                    var selectCommand = _connection.CreateCommand();
+                    selectCommand.CommandText = "SELECT * FROM Itens WHERE IdVistoria = :IdVistoria ORDER BY Ordem ASC";
+                    selectCommand.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
+
+                    var updateCommand = _connection.CreateCommand();
+                    updateCommand.CommandText = "UPDATE Itens SET Ordem = :Ordem WHERE IdItem = :IdItem";
+                    updateCommand.Parameters.Add("Ordem", OracleDbType.Int32);
+                    updateCommand.Parameters.Add("IdItem", OracleDbType.Int32);
+
+                    var reader = selectCommand.ExecuteReader();
+
+                    int newOrder = 1;
+
+                    while (reader.Read())
+                    {
+                        int itemId = Convert.ToInt32(reader["IdItem"]);
+                        updateCommand.Parameters["Ordem"].Value = newOrder;
+                        updateCommand.Parameters["IdItem"].Value = itemId;
+                        updateCommand.ExecuteNonQuery();
+                        newOrder++;
+                    }
+
+                    reader.Close();
+                }
+
+                OrdenaItens(itemModel.IdVistoria);
+
                 _connection.Close();
                 _logService.PerformOperation("PUT", "Dados de ITENS alterados.");
 
@@ -184,6 +212,9 @@ namespace APIModallportV5.Dao
                 throw new Exception(ex.Message);
             }
         }
+
+
+
         public bool DeletaItem(int idItem)
         {
             try

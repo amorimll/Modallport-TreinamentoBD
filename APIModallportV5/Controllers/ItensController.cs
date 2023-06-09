@@ -5,7 +5,9 @@ using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Linq;
 
 namespace APIModallportV5.Controllers
 {
@@ -40,12 +42,46 @@ namespace APIModallportV5.Controllers
             }
         }
 
+        [HttpGet("{idVistoria}")]
+        public JsonResult GetById(int idVistoria)
+        {
+            try
+            {
+                if (idVistoria <= 0)
+                {
+                    return new JsonResult("ID da vistoria inválido");
+                }
+
+                var Dao = new DaoItens(_logService, _connection);
+                var itens = Dao.ListaItensById(idVistoria);
+
+                return new JsonResult(itens);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(ex.Message);
+            }
+        }
 
         [HttpPost]
         public JsonResult Post(int idVistoria, [FromBody] ItemModel itemModel)
         {
             try
             {
+                if (idVistoria <= 0)
+                {
+                    return new JsonResult("ID da vistoria inválido");
+                }
+
+                var validationContext = new ValidationContext(itemModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(itemModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
                 var Dao = new DaoItens(_logService, _connection);
                 var retorno = Dao.PostItem(idVistoria, itemModel);
 
@@ -62,6 +98,20 @@ namespace APIModallportV5.Controllers
         {
             try
             {
+                if (idItem <= 0)
+                {
+                    return new JsonResult("ID do item inválido");
+                }
+
+                var validationContext = new ValidationContext(itemModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(itemModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
                 var Dao = new DaoItens(_logService, _connection);
                 var retorno = Dao.AlteraItem(idItem, itemModel);
 
@@ -78,6 +128,11 @@ namespace APIModallportV5.Controllers
         {
             try
             {
+                if (idItem <= 0)
+                {
+                    return new JsonResult("ID do item inválido");
+                }
+
                 var Dao = new DaoItens(_logService, _connection);
                 var retorno = Dao.DeletaItem(idItem);
 

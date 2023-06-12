@@ -68,6 +68,124 @@ namespace APIModallportV5.Controllers
             }
         }
 
+        [HttpGet("itens/{idVistoria}")]
+        public JsonResult GetByVistoriaId(string idVistoria)
+        {
+            try
+            {
+                _connection.Open();
+
+                var vistorias = new List<VistoriaModelAndItems>();
+                var itens = new List<ItemModel>();
+
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT IdItem, Descricao, Ordem, Tipo, Ativo, IdVistoria, DataDeCadastro, DhAlteracao FROM Itens WHERE Ativo = 'S' AND idVistoria = :idVistoria";
+                    command.Parameters.Add(":IdVistoria", idVistoria);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var item = new ItemModel
+                            {
+                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
+                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                Ordem = reader.GetInt32(reader.GetOrdinal("Ordem")),
+                                Tipo = reader.GetInt32(reader.GetOrdinal("Tipo")),
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
+                            };
+
+                            itens.Add(item);
+                        }
+                    }
+                }
+
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE idVistoria = :idVistoria ";
+                    command.Parameters.Add(":IdVistoria", idVistoria);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var vistoria = new VistoriaModelAndItems
+                            {
+                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
+                                CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
+                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                Processo = reader.GetString(reader.GetOrdinal("Processo")),
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                Items = itens,
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
+                            };
+
+                            vistorias.Add(vistoria);
+                        }
+                    }
+                }
+
+                _connection.Close();
+                _logService.PerformOperation("GET", "Dados de VISTORIAS com o mesmo id de vistoria retornados.");
+
+                return new JsonResult(vistorias);
+            }
+            catch (Exception ex)
+            {
+                _logService.PerformOperation("GET", $"{ex.Message}");
+                return new JsonResult(ex.Message);
+            }
+        }
+
+
+        [HttpGet("{idProcesso}")]
+        public JsonResult GetByrocessoId(string idProcesso)
+        {
+            try
+            {
+                _connection.Open();
+
+                var vistorias = new List<VistoriaModel>();
+
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Processo = :IdProcesso";
+                    // Bind the value to the parameter
+                    command.Parameters.Add(":IdProcesso", idProcesso);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var vistoria = new VistoriaModel
+                            {
+                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
+                                CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
+                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                Processo = reader.GetString(reader.GetOrdinal("Processo")),
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
+                            };
+
+                            vistorias.Add(vistoria);
+                        }
+                    }
+                }
+
+                _connection.Close();
+                _logService.PerformOperation("GET", "Dados de VISTORIAS com o mesmo id de vistoria retornados.");
+
+                return new JsonResult(vistorias);
+            }
+            catch (Exception ex)
+            {
+                _logService.PerformOperation("GET", $"{ex.Message}");
+                return new JsonResult(ex.Message);
+            }
+        }
 
         [HttpPost]
         public JsonResult Post([FromBody] VistoriaModel vistoriaModel)

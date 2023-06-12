@@ -4659,25 +4659,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\gabri\\.nuget\\packages\\": {},
+    "C:\\Users\\Lord\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Arquivos\\projetos e treinamentos\\APIModallport\\APIModallportV5\\APIModallportV5\\APIModallportV5.csproj",
+      "projectUniqueName": "C:\\Users\\Lord\\Documents\\ModalPort\\projetos\\Modallport-TreinamentoBD\\APIModallportV5\\APIModallportV5.csproj",
       "projectName": "APIModallportV5",
-      "projectPath": "D:\\Arquivos\\projetos e treinamentos\\APIModallport\\APIModallportV5\\APIModallportV5\\APIModallportV5.csproj",
-      "packagesPath": "C:\\Users\\gabri\\.nuget\\packages\\",
-      "outputPath": "D:\\Arquivos\\projetos e treinamentos\\APIModallport\\APIModallportV5\\APIModallportV5\\obj\\",
+      "projectPath": "C:\\Users\\Lord\\Documents\\ModalPort\\projetos\\Modallport-TreinamentoBD\\APIModallportV5\\APIModallportV5.csproj",
+      "packagesPath": "C:\\Users\\Lord\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Lord\\Documents\\ModalPort\\projetos\\Modallport-TreinamentoBD\\APIModallportV5\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\gabri\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Lord\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

@@ -1,7 +1,5 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 
-// ...
-
 public class LogRepository
 {
     private readonly string _connectionString;

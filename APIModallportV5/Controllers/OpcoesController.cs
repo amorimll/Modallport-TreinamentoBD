@@ -1,8 +1,10 @@
-﻿using APIModallportV5.Model;
+﻿using APIModallportV5.Dao;
+using APIModallportV5.Model;
 using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace APIModallportV5.Controllers
 {
@@ -12,8 +14,6 @@ namespace APIModallportV5.Controllers
     {
         private readonly OracleConnection _connection;
         private readonly LogService _logService;
-
-        DateTime dataAtual = DateTime.Now;
 
         public OpcoesController(LogService logService, OracleConnection connection)
         {
@@ -26,34 +26,8 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
-
-                var opcoes = new List<OpcaoModel>();
-
-                using (var command = _connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT IdOpcao, Opcao, IdItem, DataDeCadastro, DhAlteracao FROM OpcoesItens";
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var opcao = new OpcaoModel
-                            {
-                                IdOpcao = reader.GetInt32(reader.GetOrdinal("IdOpcao")),
-                                Opcao = reader.GetString(reader.GetOrdinal("Opcao")),
-                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
-                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao")),
-                            };
-
-                            opcoes.Add(opcao);
-                        }
-                    }
-                }
-
-                _connection.Close();
-                _logService.PerformOperation("GET", "Dados de OPÇÕES retornados.");
+                var Dao = new DaoOpcoes(_logService, _connection);
+                var opcoes = Dao.ListaOpcoes();
 
                 return new JsonResult(opcoes);
             }
@@ -64,33 +38,29 @@ namespace APIModallportV5.Controllers
             }
         }
 
-
         [HttpPost]
-        public JsonResult Post(int idItem, [FromBody] List<OpcaoModel> opcaoModels)
+        public JsonResult Post(int idItem, [FromBody] OpcaoModel opcaoModel)
         {
             try
             {
-                _connection.Open();
-
-                DateTime dataDeCadastro = DateTime.Now;
-
-                foreach (var opcaoModel in opcaoModels)
+                if (idItem <= 0)
                 {
-                    using (var command = _connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO OpcoesItens (Opcao, DataDeCadastro, DhAlteracao, IdItem) VALUES (:Opcao, :DataDeCadastro, :DhAlteracao, :IdItem)";
-                        command.Parameters.Add("Opcao", OracleDbType.Varchar2).Value = opcaoModel.Opcao;
-                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
-                        command.ExecuteNonQuery();
-                    }
+                    return new JsonResult("ID do item inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("POST", "Dados de OPÇÕES inseridos.");
+                var validationContext = new ValidationContext(opcaoModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(opcaoModel, validationContext, validationResults, validateAllProperties: true);
 
-                return new JsonResult(Ok());
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
+                var Dao = new DaoOpcoes(_logService, _connection);
+                var retorno = Dao.PostOpcao(idItem, opcaoModel);
+
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {

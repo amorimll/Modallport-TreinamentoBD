@@ -1,10 +1,13 @@
-﻿using APIModallportV5.Model;
+﻿using APIModallportV5.Dao;
+using APIModallportV5.Model;
 using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Linq;
 
 namespace APIModallportV5.Controllers
 {
@@ -28,124 +31,64 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
-
-                var itens = new List<ItemModel>();
-
-                using (var command = _connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT IdItem, Descricao, Ordem, Tipo, Ativo, IdVistoria, DataDeCadastro, DhAlteracao FROM Itens WHERE Ativo = 'S'";
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var item = new ItemModel
-                            {
-                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
-                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Ordem = reader.GetInt32(reader.GetOrdinal("Ordem")),
-                                Tipo = reader.GetInt32(reader.GetOrdinal("Tipo")),
-                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
-                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
-                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
-                            };
-
-                            itens.Add(item);
-                        }
-                    }
-                }
-
-                _connection.Close();
-                _logService.PerformOperation("GET", "Dados de ITENS retornados.");
+                var Dao = new DaoItens(_logService, _connection);
+                var itens = Dao.ListaItens();
 
                 return new JsonResult(itens);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("GET", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
 
-
-        [HttpPost]
-        public JsonResult Post(int idVistoria, [FromBody] List<ItemModel> itemModels)
+        [HttpGet("{idVistoria}")]
+        public JsonResult GetById(int idVistoria)
         {
             try
             {
-                _connection.Open();
-
-                //var opcoesController = new OpcoesController(_connection);
-                //var respostasController = new RespostasController(_connection);
-                //List<int> numerosOpcoes = new List<int>();
-                //List<int> numerosRespostas = new List<int>();
-                //var itemOpcoes = new OpcoesListModel
-                //{
-                //    IdItemList = new List<int>(numerosOpcoes),
-                //    Opcoes = new List<OpcaoModel>(),
-                //};
-
-                //var itemRespostas = new RespostasListModel
-                //{
-                //    IdItemList = new List<int>(numerosRespostas),
-                //    Respostas = new List<RespostaModel>(),
-                //};
-
-                foreach (var itemModel in itemModels)
+                if (idVistoria <= 0)
                 {
-                    using (var command = _connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO Itens (Descricao, Ordem, Tipo, IdVistoria, DataDeCadastro, DhAlteracao) VALUES (:Descricao, :Ordem, :Tipo, :IdVistoria, :DataDeCadastro, :DhAlteracao)  /*RETURNING IdItem INTO :IdItem*/";
-                        command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = itemModel.Descricao;
-                        command.Parameters.Add("Ordem", OracleDbType.Int32).Value = Convert.ToInt32(itemModel.Ordem);
-                        command.Parameters.Add("Tipo", OracleDbType.Char).Value = itemModel.Tipo;
-                        command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
-                        command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
-                        command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                        //command.Parameters.Add("IdItem", OracleDbType.Int32).Direction = ParameterDirection.Output;
-                        command.ExecuteNonQuery();
-
-                        //var idItemOracleDecimal = (OracleDecimal)command.Parameters["IdItem"].Value;
-                        //itemOpcoes.IdItemList.Add(idItemOracleDecimal.ToInt32());
-                        //itemRespostas.IdItemList.Add(idItemOracleDecimal.ToInt32());
-                    }
-
-                    //foreach (var opcaoModel in itemModel.opcaoModels)
-                    //{
-                    //    itemOpcoes.Opcoes.AddRange(opcaoModel.Opcoes);
-                    //}
-
-                    //foreach (var respostaModel in itemModel.respostaModels)
-                    //{
-                    //    itemRespostas.Respostas.AddRange(respostaModel.Respostas);
-                    //}
-
-                    //itemOpcoes.Opcoes.Clear();
-                    //itemRespostas.Respostas.Clear();
+                    return new JsonResult("ID da vistoria inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("POST", "Dados de ITENS inseridos.");
+                var Dao = new DaoItens(_logService, _connection);
+                var itens = Dao.ListaItensById(idVistoria);
 
-
-                //foreach (var idItem in itemOpcoes.IdItemList)
-                //{
-                //    Console.WriteLine(idItem);
-                //    opcoesController.Post(idItem, itemOpcoes.Opcoes);
-                //}
-
-                //foreach (var idItem in itemRespostas.IdItemList)
-                //{
-                //    Console.WriteLine(idItem);
-                //    respostasController.Post(idItem, itemRespostas.Respostas);
-                //}
-                return new JsonResult(Ok());
+                return new JsonResult(itens);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("POST", $"{ex.Message}");
+                return new JsonResult(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Post(int idVistoria, [FromBody] ItemModel itemModel)
+        {
+            try
+            {
+                if (idVistoria <= 0)
+                {
+                    return new JsonResult("ID da vistoria inválido");
+                }
+
+                var validationContext = new ValidationContext(itemModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(itemModel, validationContext, validationResults, validateAllProperties: true);
+
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
+                var Dao = new DaoItens(_logService, _connection);
+                var retorno = Dao.PostItem(idVistoria, itemModel);
+
+                return new JsonResult(retorno);
+            }
+            catch (Exception ex)
+            {
                 return new JsonResult(ex.Message);
             }
         }
@@ -155,83 +98,48 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
-
-                using (var command = _connection.CreateCommand())
+                if (idItem <= 0)
                 {
-                    command.CommandText = "UPDATE Itens SET Descricao = :Descricao, Ordem = :Ordem, Tipo = :Tipo, DhAlteracao = :DhAlteracao WHERE IdItem = :IdItem";
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = itemModel.Descricao;
-                    command.Parameters.Add("Ordem", OracleDbType.Int32).Value = itemModel.Ordem;
-                    command.Parameters.Add("Tipo", OracleDbType.Int32).Value = itemModel.Tipo;
-                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                    command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
-                    command.ExecuteNonQuery();
+                    return new JsonResult("ID do item inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("PUT", "Dados de ITENS alterados.");
+                var validationContext = new ValidationContext(itemModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(itemModel, validationContext, validationResults, validateAllProperties: true);
 
-                return new JsonResult(Ok());
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
+                var Dao = new DaoItens(_logService, _connection);
+                var retorno = Dao.AlteraItem(idItem, itemModel);
+
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("PUT", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
-
-        //[HttpPut("{idItem}")]
-        //public JsonResult Put(int idItem, [FromBody] ItemModel itemModel)
-        //{
-
-        //    try
-        //    {
-        //        _connection.Open();
-
-        //        using (var command = _connection.CreateCommand())
-        //        {
-        //            command.CommandText = "UPDATE Itens SET Descricao = :Descricao, Tipo = :Tipo, Ordem = :Ordem, DhAlteracao = :DhAlteracao WHERE IdItem = :IdItem";
-        //            command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = itemModel.Descricao;
-        //            command.Parameters.Add("Ordem", OracleDbType.Int32).Value = itemModel.Ordem;
-        //            command.Parameters.Add("Tipo", OracleDbType.Int32).Value = itemModel.Tipo;
-        //            command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
-        //            command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-        //            command.ExecuteNonQuery();
-        //        }
-
-        //        _connection.Close();
-
-        //        return new JsonResult(Ok());
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new JsonResult(ex.Message);
-        //    }
-        //}
 
         [HttpDelete("{idItem}")]
         public JsonResult Delete(int idItem)
         {
             try
             {
-                _connection.Open();
-
-                using (var command = _connection.CreateCommand())
+                if (idItem <= 0)
                 {
-                    command.CommandText = "UPDATE Itens SET Ativo = 'N', DhAlteracao = :DhAlteracao WHERE IdItem = :IdItem";
-                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                    command.Parameters.Add("IdItem", OracleDbType.Int32).Value = idItem;
-                    command.ExecuteNonQuery();
+                    return new JsonResult("ID do item inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("DELETE", "Dados de ITENS removidos.");
+                var Dao = new DaoItens(_logService, _connection);
+                var retorno = Dao.DeletaItem(idItem);
 
-                return new JsonResult(Ok());
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("DELETE", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }

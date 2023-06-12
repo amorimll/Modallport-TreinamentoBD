@@ -1,10 +1,11 @@
-﻿using APIModallportV5.Model;
+﻿using APIModallportV5.Dao;
+using APIModallportV5.Model;
 using Microsoft.AspNetCore.Mvc;
 using Oracle.ManagedDataAccess.Client;
-using Oracle.ManagedDataAccess.Types;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace APIModallportV5.Controllers
 {
@@ -14,8 +15,6 @@ namespace APIModallportV5.Controllers
     {
         private readonly OracleConnection _connection;
         private readonly LogService _logService;
-
-        DateTime dataAtual = DateTime.Now;
 
         public VistoriasController(LogService logService, OracleConnection connection)
         {
@@ -28,42 +27,13 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
-
-                var vistorias = new List<VistoriaModel>();
-
-                using (var command = _connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S'";
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var vistoria = new VistoriaModel
-                            {
-                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
-                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Processo = reader.GetString(reader.GetOrdinal("Processo")),
-                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
-                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
-                            };
-
-                            vistorias.Add(vistoria);
-                        }
-                    }
-                }
-
-                _connection.Close();
-                _logService.PerformOperation("GET", "Dados de VISTORIAS retornados.");
+                var Dao = new DaoVistorias(_logService, _connection);
+                var vistorias = Dao.ListaVistorias();
 
                 return new JsonResult(vistorias);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("GET", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -192,44 +162,23 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
+                // Validar o modelo de vistoria usando anotações de validação
+                var validationContext = new ValidationContext(vistoriaModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(vistoriaModel, validationContext, validationResults, validateAllProperties: true);
 
-                //var itensController = new ItensController(_connection);
-                //int idVistoria;
-
-                using (var command = _connection.CreateCommand())
+                if (!isValid)
                 {
-                    command.CommandText = "INSERT INTO Vistorias (CodVistoria, Descricao, Processo, DataDeCadastro, DhAlteracao) VALUES (:CodVistoria, :Descricao, :Processo, :DataDeCadastro, :DhAlteracao) /*RETURNING IdVistoria INTO :IdVistoria*/";
-                    command.Parameters.Add("CodVistoria", OracleDbType.Varchar2).Value = vistoriaModel.CodVistoria;
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = vistoriaModel.Descricao;
-                    command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = vistoriaModel.Processo;
-                    command.Parameters.Add("DataDeCadastro", OracleDbType.Date).Value = dataAtual;
-                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                    //command.Parameters.Add("IdVistoria", OracleDbType.Int32).Direction = ParameterDirection.Output;
-                    command.ExecuteNonQuery();
-
-                    //var idVistoriaOracleDecimal = (OracleDecimal)command.Parameters["IdVistoria"].Value;
-                    //idVistoria = idVistoriaOracleDecimal.ToInt32();
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("POST", "Dados de VISTORIAS inseridos.");
+                var Dao = new DaoVistorias(_logService, _connection);
+                var retorno = Dao.PostVistoria(vistoriaModel);
 
-                //var vistoriaItem = new VistoriaItemListModel
-                //{
-                //    IdVistoria = idVistoria,
-                //    Itens = new List<ItemModel>()
-                //};
-
-                //vistoriaItem.Itens.AddRange(vistoriaModel.Itens);
-
-                //itensController.Post(vistoriaItem.IdVistoria, vistoriaItem.Itens);
-
-                return new JsonResult(Ok());
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("POST", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
@@ -239,54 +188,49 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
-
-                using (var command = _connection.CreateCommand())
+                if (idVistoria <= 0)
                 {
-                    command.CommandText = "UPDATE Vistorias SET Descricao = :Descricao, Processo = :Processo, DhAlteracao = :DhAlteracao WHERE IdVistoria = :IdVistoria";
-                    command.Parameters.Add("Descricao", OracleDbType.Varchar2).Value = vistoriaModel.Descricao;
-                    command.Parameters.Add("Processo", OracleDbType.Varchar2).Value = vistoriaModel.Processo;
-                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
-                    command.ExecuteNonQuery();
+                    return new JsonResult("ID da vistoria inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("PUT", "Dados de VISTORIAS alterados.");
+                // Validar o modelo de vistoria usando anotações de validação
+                var validationContext = new ValidationContext(vistoriaModel, serviceProvider: null, items: null);
+                var validationResults = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(vistoriaModel, validationContext, validationResults, validateAllProperties: true);
 
-                return new JsonResult(Ok());
+                if (!isValid)
+                {
+                    return new JsonResult("Dados inválidos. Verifique os campos fornecidos.");
+                }
+
+                var Dao = new DaoVistorias(_logService, _connection);
+                var retorno = Dao.AlteraVistoria(idVistoria, vistoriaModel);
+
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("PUT", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }
-
 
         [HttpDelete("{idVistoria}")]
         public JsonResult Delete(int idVistoria)
         {
             try
             {
-                _connection.Open();
-
-                using (var command = _connection.CreateCommand())
+                if (idVistoria <= 0)
                 {
-                    command.CommandText = "UPDATE Vistorias SET Ativo = 'N', DhAlteracao = :DhAlteracao WHERE IdVistoria = :IdVistoria";
-                    command.Parameters.Add("DhAlteracao", OracleDbType.Date).Value = dataAtual;
-                    command.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
-                    command.ExecuteNonQuery();
+                    return new JsonResult("ID da vistoria inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("DELETE", "Dados de VISTORIAS removidos.");
+                var Dao = new DaoVistorias(_logService, _connection);
+                var retorno = Dao.DeletaVistoria(idVistoria);
 
-                return new JsonResult(Ok());
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {
-                _logService.PerformOperation("DELETE", $"{ex.Message}");
                 return new JsonResult(ex.Message);
             }
         }

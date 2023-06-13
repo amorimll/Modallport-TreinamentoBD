@@ -39,7 +39,7 @@ namespace APIModallportV5.Controllers
         }
 
         [HttpGet("itens/{idVistoria}")]
-        public JsonResult GetByVistoriaId(string idVistoria)
+        public JsonResult GetByVistoriaId(int idVistoria)
         {
             try
             {
@@ -75,8 +75,9 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE idVistoria = :idVistoria ";
                     command.Parameters.Add(":IdVistoria", idVistoria);
+                    command.CommandText = "SELECT IdVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S' AND idVistoria = :idVistoria";
+
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -84,7 +85,6 @@ namespace APIModallportV5.Controllers
                             var vistoria = new VistoriaModelAndItems
                             {
                                 IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
                                 Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
                                 Processo = reader.GetString(reader.GetOrdinal("Processo")),
                                 Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
@@ -122,7 +122,7 @@ namespace APIModallportV5.Controllers
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT IdVistoria, CodVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Processo = :IdProcesso";
+                    command.CommandText = "SELECT IdVistoria,  Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S' AND Processo = :IdProcesso";
                     // Bind the value to the parameter
                     command.Parameters.Add(":IdProcesso", idProcesso);
                     using (var reader = command.ExecuteReader())
@@ -132,9 +132,8 @@ namespace APIModallportV5.Controllers
                             var vistoria = new VistoriaModel
                             {
                                 IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                CodVistoria = reader.GetString(reader.GetOrdinal("CodVistoria")),
                                 Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Processo = reader.GetString(reader.GetOrdinal("Processo")),
+                                Processo = reader.GetInt32(reader.GetOrdinal("Processo")),
                                 Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
                                 DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
                                 DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))

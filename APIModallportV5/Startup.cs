@@ -44,7 +44,15 @@ namespace APIModallportV5
 
             services.AddMvc();
 
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
 
             services.AddControllers();
 

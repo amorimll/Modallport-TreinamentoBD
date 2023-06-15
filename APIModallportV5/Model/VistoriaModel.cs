@@ -19,7 +19,7 @@ namespace APIModallportV5.Model
         public string Descricao { get; set; }
         public string Processo { get; set; }
         public string Ativo { get; set; }
-        public List<ItemModel> Items { get; set; }
+        public List<ItemModelAndOption> Items { get; set; }
         public DateTime DataDeCadastro { get; set; }
         public DateTime DhAlteracao { get; set; }
         //public List<ItemModel> Itens { get; set; }

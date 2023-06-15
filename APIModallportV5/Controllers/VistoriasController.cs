@@ -1,11 +1,15 @@
 ﻿using APIModallportV5.Dao;
 using APIModallportV5.Model;
+using FakeItEasy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace APIModallportV5.Controllers
 {
@@ -43,65 +47,17 @@ namespace APIModallportV5.Controllers
         {
             try
             {
-                _connection.Open();
 
-                var vistorias = new List<VistoriaModelAndItems>();
-                var itens = new List<ItemModel>();
-
-                using (var command = _connection.CreateCommand())
+                if (idVistoria <= 0)
                 {
-                    command.CommandText = "SELECT IdItem, Descricao, Ordem, Tipo, Ativo, IdVistoria, DataDeCadastro, DhAlteracao FROM Itens WHERE Ativo = 'S' AND idVistoria = :idVistoria";
-                    command.Parameters.Add(":IdVistoria", idVistoria);
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var item = new ItemModel
-                            {
-                                IdItem = reader.GetInt32(reader.GetOrdinal("IdItem")),
-                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Ordem = reader.GetInt32(reader.GetOrdinal("Ordem")),
-                                Tipo = reader.GetInt32(reader.GetOrdinal("Tipo")),
-                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
-                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
-                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
-                            };
-
-                            itens.Add(item);
-                        }
-                    }
+                    return new JsonResult("ID do processo inválido");
                 }
 
-                using (var command = _connection.CreateCommand())
-                {
-                    command.Parameters.Add(":IdVistoria", idVistoria);
-                    command.CommandText = "SELECT IdVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S' AND idVistoria = :idVistoria";
 
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var vistoria = new VistoriaModelAndItems
-                            {
-                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Processo = reader.GetString(reader.GetOrdinal("Processo")),
-                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
-                                Items = itens,
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
-                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
-                            };
+                var Dao = new DaoVistorias(_logService, _connection);
+                var retorno = Dao.ListaVistoriasItens(idVistoria);
 
-                            vistorias.Add(vistoria);
-                        }
-                    }
-                }
-
-                _connection.Close();
-                _logService.PerformOperation("GET", "Dados de VISTORIAS com o mesmo id de vistoria retornados.");
-
-                return new JsonResult(vistorias);
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {
@@ -112,42 +68,21 @@ namespace APIModallportV5.Controllers
 
 
         [HttpGet("{idProcesso}")]
-        public JsonResult GetByrocessoId(string idProcesso)
+        public JsonResult GetByrocessoId(int idProcesso)
         {
             try
             {
-                _connection.Open();
 
-                var vistorias = new List<VistoriaModel>();
-
-                using (var command = _connection.CreateCommand())
+                if (idProcesso <= 0)
                 {
-                    command.CommandText = "SELECT IdVistoria,  Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S' AND Processo = :IdProcesso";
-                    // Bind the value to the parameter
-                    command.Parameters.Add(":IdProcesso", idProcesso);
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var vistoria = new VistoriaModel
-                            {
-                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
-                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
-                                Processo = reader.GetInt32(reader.GetOrdinal("Processo")),
-                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
-                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
-                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
-                            };
-
-                            vistorias.Add(vistoria);
-                        }
-                    }
+                    return new JsonResult("ID do processo inválido");
                 }
 
-                _connection.Close();
-                _logService.PerformOperation("GET", "Dados de VISTORIAS com o mesmo id de vistoria retornados.");
 
-                return new JsonResult(vistorias);
+                var Dao = new DaoVistorias(_logService, _connection);
+                var retorno = Dao.ListaVistoriasProcesso(idProcesso);
+
+                return new JsonResult(retorno);
             }
             catch (Exception ex)
             {

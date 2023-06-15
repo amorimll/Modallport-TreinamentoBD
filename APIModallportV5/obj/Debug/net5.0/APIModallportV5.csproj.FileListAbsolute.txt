@@ -120,3 +120,9 @@ C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallpor
 C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\obj\Debug\net5.0\APIModallportV5.pdb
 C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\obj\Debug\net5.0\APIModallportV5.genruntimeconfig.cache
 C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\obj\Debug\net5.0\ref\APIModallportV5.dll
+C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\bin\Debug\net5.0\Json.Net.dll
+C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\bin\Debug\net5.0\Newtonsoft.Json.dll
+C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\bin\Debug\net5.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\bin\Debug\net5.0\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\bin\Debug\net5.0\System.Text.Encodings.Web.dll
+C:\Users\Lord\Documents\ModalPort\projetos\Modallport-TreinamentoBD\APIModallportV5\bin\Debug\net5.0\System.Text.Json.dll

@@ -42,6 +42,30 @@ namespace APIModallportV5.Controllers
             }
         }
 
+        [HttpGet("/api/Vistorias/id/{idVistoria}")]
+        public JsonResult GetOneVistoria(int idVistoria)
+        {
+            try
+            {
+
+                if (idVistoria <= 0)
+                {
+                    return new JsonResult("ID do processo inválido");
+                }
+
+
+                var Dao = new DaoVistorias(_logService, _connection);
+                var retorno = Dao.ListaVistoriasById(idVistoria);
+
+                return new JsonResult(retorno);
+            }
+            catch (Exception ex)
+            {
+                _logService.PerformOperation("GET", $"{ex.Message}");
+                return new JsonResult(ex.Message);
+            }
+        }
+
         [HttpGet("itens/{idVistoria}")]
         public JsonResult GetByVistoriaId(int idVistoria)
         {

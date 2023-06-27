@@ -19,7 +19,7 @@ namespace APIModallportV5.Dao
             _logService = logService;
             _connection = connection;
         }
-        public List<ProcessoModel> ListaProcessos()
+        public List<ProcessoModel> ListaCombo()
         {
             try
             {

@@ -141,6 +141,8 @@ namespace APIModallportV5.Dao
                     idItem = idItemOracleDecimal.ToInt32();
                 }
 
+                OrdenaItens(idVistoria);
+
                 _connection.Close();
                 _logService.PerformOperation("POST", "Dados de ITENS inseridos.");
 
@@ -161,6 +163,14 @@ namespace APIModallportV5.Dao
             {
                 _connection.Open();
 
+                using (var updateCommand = _connection.CreateCommand())
+                {
+                    updateCommand.CommandText = "UPDATE Itens SET Ordem = Ordem + 1 WHERE IdVistoria = :IdVistoria AND Ordem >= :NovaPosicao";
+                    updateCommand.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = itemModel.IdVistoria;
+                    updateCommand.Parameters.Add("NovaPosicao", OracleDbType.Int32).Value = itemModel.Ordem;
+                    updateCommand.ExecuteNonQuery();
+                }
+
                 using (var command = _connection.CreateCommand())
                 {
                     command.CommandText = "UPDATE Itens SET Descricao = :Descricao, Ordem = :Ordem, Tipo = :Tipo, DhAlteracao = :DhAlteracao WHERE IdItem = :IdItem";
@@ -172,33 +182,7 @@ namespace APIModallportV5.Dao
                     command.ExecuteNonQuery();
                 }
 
-                void OrdenaItens(int idVistoria)
-                {
-                    var selectCommand = _connection.CreateCommand();
-                    selectCommand.CommandText = "SELECT * FROM Itens WHERE IdVistoria = :IdVistoria ORDER BY Ordem ASC";
-                    selectCommand.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
-
-                    var updateCommand = _connection.CreateCommand();
-                    updateCommand.CommandText = "UPDATE Itens SET Ordem = :Ordem WHERE IdItem = :IdItem";
-                    updateCommand.Parameters.Add("Ordem", OracleDbType.Int32);
-                    updateCommand.Parameters.Add("IdItem", OracleDbType.Int32);
-
-                    var reader = selectCommand.ExecuteReader();
-
-                    int newOrder = 1;
-
-                    while (reader.Read())
-                    {
-                        int itemId = Convert.ToInt32(reader["IdItem"]);
-                        updateCommand.Parameters["Ordem"].Value = newOrder;
-                        updateCommand.Parameters["IdItem"].Value = itemId;
-                        updateCommand.ExecuteNonQuery();
-                        newOrder++;
-                    }
-
-                    reader.Close();
-                }
-
+                // Atualizar a ordem dos itens após a alteração
                 OrdenaItens(itemModel.IdVistoria);
 
                 _connection.Close();
@@ -213,7 +197,33 @@ namespace APIModallportV5.Dao
             }
         }
 
+        private void OrdenaItens(int idVistoria)
+        {
+            using (var selectCommand = _connection.CreateCommand())
+            {
+                selectCommand.CommandText = "SELECT IdItem FROM Itens WHERE IdVistoria = :IdVistoria ORDER BY Ordem ASC";
+                selectCommand.Parameters.Add("IdVistoria", OracleDbType.Int32).Value = idVistoria;
 
+                var updateCommand = _connection.CreateCommand();
+                updateCommand.CommandText = "UPDATE Itens SET Ordem = :Ordem WHERE IdItem = :IdItem";
+                updateCommand.Parameters.Add("Ordem", OracleDbType.Int32);
+                updateCommand.Parameters.Add("IdItem", OracleDbType.Int32);
+
+                using (var reader = selectCommand.ExecuteReader())
+                {
+                    int newOrder = 1;
+
+                    while (reader.Read())
+                    {
+                        int itemId = reader.GetInt32(reader.GetOrdinal("IdItem"));
+                        updateCommand.Parameters["Ordem"].Value = newOrder;
+                        updateCommand.Parameters["IdItem"].Value = itemId;
+                        updateCommand.ExecuteNonQuery();
+                        newOrder++;
+                    }
+                }
+            }
+        }
 
         public bool DeletaItem(int idItem)
         {

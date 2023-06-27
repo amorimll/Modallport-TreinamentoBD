@@ -22,7 +22,7 @@ namespace APIModallportV5.Dao
             _connection = connection;
         }
 
-        public List<VistoriaModel> ListaVistorias()
+        public List<VistoriaModel> ListaCombo()
         {
             try
             {

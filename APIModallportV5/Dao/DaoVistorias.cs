@@ -65,6 +65,49 @@ namespace APIModallportV5.Dao
             }
         }
 
+        public List<VistoriaModel> ListaVistoriasById(int idVistoria)
+        {
+            try
+            {
+                _connection.Open();
+
+                var vistorias = new List<VistoriaModel>();
+
+                using (var command = _connection.CreateCommand())
+                {
+                    command.CommandText = $"SELECT IdVistoria, Descricao, Processo, Ativo, DataDeCadastro, DhAlteracao FROM Vistorias WHERE Ativo = 'S' AND IdVistoria = {idVistoria}";
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var vistoria = new VistoriaModel
+                            {
+                                IdVistoria = reader.GetInt32(reader.GetOrdinal("IdVistoria")),
+                                Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                Processo = reader.GetInt32(reader.GetOrdinal("Processo")),
+                                Ativo = reader.GetString(reader.GetOrdinal("Ativo")),
+                                DataDeCadastro = reader.GetDateTime(reader.GetOrdinal("DataDeCadastro")),
+                                DhAlteracao = reader.GetDateTime(reader.GetOrdinal("DhAlteracao"))
+                            };
+
+                            vistorias.Add(vistoria);
+                        }
+                    }
+                }
+
+                _connection.Close();
+                _logService.PerformOperation("GET", "Dados de VISTORIAS retornados.");
+
+                return vistorias;
+            }
+            catch (Exception ex)
+            {
+                _logService.PerformOperation("GET", $"{ex.Message}");
+                throw new Exception(ex.Message);
+            }
+        }
+
         public List<VistoriaModel> ListaVistoriasProcesso(int idProcesso)
         {
             try

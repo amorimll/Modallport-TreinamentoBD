@@ -27,12 +27,12 @@ namespace APIModallportV5.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetAll()
+        public JsonResult GetCombo()
         {
             try
             {
                 var Dao = new DaoVistorias(_logService, _connection);
-                var vistorias = Dao.ListaVistorias();
+                var vistorias = Dao.ListaCombo();
 
                 return new JsonResult(vistorias);
             }

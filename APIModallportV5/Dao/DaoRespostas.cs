@@ -20,7 +20,7 @@ namespace APIModallportV5.Dao
             _logService = logService;
             _connection = connection;
         }
-        public List<RespostaModel> ListaRespostas()
+        public List<RespostaModel> ListaCombo()
         {
             try
             {

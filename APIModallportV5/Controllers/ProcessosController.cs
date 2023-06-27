@@ -25,12 +25,12 @@ namespace APIModallPortV5.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetAll()
+        public JsonResult GetCombo()
         {
             try
             {
                 var Dao = new DaoProcessos(_logService, _connection);
-                var processos = Dao.ListaProcessos();
+                var processos = Dao.ListaCombo();
 
                 return new JsonResult(processos);
             }

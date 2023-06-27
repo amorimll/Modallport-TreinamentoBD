@@ -27,7 +27,7 @@ namespace APIModallportV5.Dao
             public List<ItemModel> Itens { get; set; }
         }
 
-        public List<ItemModel> ListaItens()
+        public List<ItemModel> ListaCombo()
         {
             try
             {
